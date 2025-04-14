@@ -42,7 +42,9 @@ std::string DataProcessor::processData(const std::string& data) {
         oss << w << " ";
     }
     std::string result = oss.str();
-    if (!result.empty()) result.pop_back();
+    if (!result.empty()) {
+        result.pop_back();
+    }
     return result;
 }
 
@@ -50,20 +52,22 @@ void DataProcessor::run() {
     std::cout << "Data Processor started. Waiting for clients..." << std::endl;
     while (true) {
         SOCKET clientSocket = accept(_clientServer.getSocket(), nullptr, nullptr);
-        if (clientSocket == INVALID_SOCKET) continue;
+        if (clientSocket == INVALID_SOCKET) {
+            continue;
+        }
 
         char buffer[1024];
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
-        if (bytesReceived > 0) {
-            buffer[bytesReceived] = '\0';
-            std::string result = processData(buffer);
+        int bytesReceived;
+        do {
+            bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+            if (bytesReceived > 0) {
+                buffer[bytesReceived] = '\0';
+                std::string result = processData(buffer);
+                send(clientSocket, "OK", 2, 0);
+                send(_displayClient.getSocket(), result.c_str(), result.size(), 0);
+            }
+        } while (bytesReceived > 0);
 
-            // Отправка подтверждения клиенту
-            send(clientSocket, "OK", 2, 0);
-
-            // Отправка результата на сервер отображения
-            send(_displayClient.getSocket(), result.c_str(), result.size(), 0);
-        }
         closesocket(clientSocket);
     }
 }

@@ -22,14 +22,19 @@ void DisplayServer::run() {
     std::cout << "Display Server started. Waiting for data..." << std::endl;
     while (true) {
         SOCKET clientSocket = accept(_network.getSocket(), nullptr, nullptr);
-        if (clientSocket == INVALID_SOCKET) continue;
-
-        char buffer[1024];
-        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
-        if (bytesReceived > 0) {
-            buffer[bytesReceived] = '\0';
-            std::cout << "Result: " << buffer << std::endl;
+        if (clientSocket == INVALID_SOCKET) {
+            continue;
         }
+
+        while (true) {
+            char buffer[1024];
+            int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+            if (bytesReceived > 0) {
+                buffer[bytesReceived] = '\0';
+                std::cout << "Result: " << buffer << std::endl;
+            }
+        }
+
         closesocket(clientSocket);
     }
 }
