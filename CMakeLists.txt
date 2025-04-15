@@ -16,26 +16,26 @@ include_directories(include)
 add_executable(client 
     src/client_main.cpp 
     src/Client.cpp 
-    src/NetworkBase.cpp
+    src/SocketManager.cpp
 )
 
 add_executable(data_processor 
     src/data_processor_main.cpp
     src/DataProcessor.cpp
     src/DataProcessorUtils.cpp
-    src/NetworkBase.cpp
+    src/SocketManager.cpp
 )
 
 add_executable(display_server 
     src/display_server_main.cpp 
     src/DisplayServer.cpp 
-    src/NetworkBase.cpp
+    src/SocketManager.cpp
 )
 
 add_executable(DataProcessorTests
     tests/DataProcessorTests.cpp
     src/DataProcessorUtils.cpp
-    src/NetworkBase.cpp
+    src/SocketManager.cpp
 )
 
 find_package(GTest REQUIRED)

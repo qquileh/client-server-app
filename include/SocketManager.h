@@ -4,14 +4,14 @@
 #include <string>
 #include <stdexcept>
 
-class NetworkBase {
+class SocketManager {
 private:
     SOCKET socketHandle;
     sockaddr_in address;
 
 public:
-    NetworkBase();
-    ~NetworkBase();
+    SocketManager();
+    ~SocketManager();
 
     void createSocket(int type = SOCK_STREAM);
     void setupAddress(int port, const char* ip = nullptr);

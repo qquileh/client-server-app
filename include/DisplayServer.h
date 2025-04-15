@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NetworkBase.h"
+#include "SocketManager.h"
 
 class DisplayServer {
 private:
-    NetworkBase _network;
+    SocketManager _network;
 
 public:
     DisplayServer(int port);

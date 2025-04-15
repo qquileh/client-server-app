@@ -1,14 +1,14 @@
 #pragma once
 
-#include "NetworkBase.h"
+#include "SocketManager.h"
 #include "DataProcessorUtils.h"
 #include <string>
 
 
 class DataProcessor {
 private:
-    NetworkBase _processorServer;
-    NetworkBase _displayConnector;
+    SocketManager _processorServer;
+    SocketManager _displayConnector;
     DataProcessorUtils _utils;
 
 public:

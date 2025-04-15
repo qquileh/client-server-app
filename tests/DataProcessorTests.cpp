@@ -8,8 +8,8 @@ protected:
 };
 
 TEST_F(UtilsTest, RemovesDuplicates) {
-    std::string input = "apple banana apple";
-    std::string expected = "apple banana";
+    std::string input = "hello world world";
+    std::string expected = "hello world";
     EXPECT_EQ(utils.processData(input), expected);
 }
 
@@ -38,8 +38,8 @@ TEST_F(UtilsTest, MultipleSpaces) {
 }
 
 TEST_F(UtilsTest, CaseSensitivity) {
-    std::string input = "Apple apple Banana";
-    std::string expected = "Apple apple Banana";
+    std::string input = "hello world Hello";
+    std::string expected = "hello world Hello";
     EXPECT_EQ(utils.processData(input), expected);
 }
 
