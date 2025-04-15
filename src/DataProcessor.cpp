@@ -28,58 +28,61 @@ DataProcessor::DataProcessor(const char* displayIp, int processorPort, int displ
 
 std::string DataProcessor::processData(const std::string& data) {
     std::unordered_set<std::string> uniqueWords;
-    std::vector<std::string> tokens;
-    std::string currentToken;
-    bool isCurrentWord = false;
-
-    for (char c : data) {
-        bool isWordChar = (std::isalpha(c) || c == '-' || c == '\'');
-
-        if (isWordChar) {
-            if (!isCurrentWord && !currentToken.empty()) {
-                tokens.push_back(currentToken);
-                currentToken.clear();
-            }
-            isCurrentWord = true;
-            currentToken += c;
-        } else {
-            if (isCurrentWord && !currentToken.empty()) {
-                tokens.push_back(currentToken);
-                currentToken.clear();
-            }
-            isCurrentWord = false;
-            currentToken += c;
-        }
-    }
-
-    if (!currentToken.empty()) {
-        tokens.push_back(currentToken);
-    }
-
     std::string result;
-    for (const auto& token : tokens) {
-        bool isWord = true;
-        for (char c : token) {
-            if (!std::isalpha(c) && c != '-' && c != '\'') {
-                isWord = false;
-                break;
-            }
-        }
+    std::string currentWord;
+    bool isInvalid = false;
+    bool lastSymbolWasNonAlpha = false;
+    bool hasValidWords = false;
 
-        if (isWord && !token.empty()) {
-            if (uniqueWords.insert(token).second) {
-                result += token;
-            }
+    for (size_t i = 0; i < data.size(); ++i) {
+        char c = data[i];
+
+        if (std::isalpha(static_cast<unsigned char>(c))) {
+            currentWord += c;
+            lastSymbolWasNonAlpha = false;
+            hasValidWords = true;
         } else {
-            result += token;
+            if (!currentWord.empty()) {
+                if (uniqueWords.insert(currentWord).second) {
+                    if (!result.empty()) {
+                        result += " ";
+                    }
+                    result += currentWord;
+                }
+                currentWord.clear();
+            }
+
+            if (c != ' ' && c != ',' && c != '.' && c != '!' && c != '?') {
+                isInvalid = true;
+            }
+
+            if (c != ' ' && lastSymbolWasNonAlpha && data[i - 1] != ' ') {
+                isInvalid = true;
+            }
+
+            lastSymbolWasNonAlpha = (c != ' ');
         }
     }
 
-    return result;
+    if (!currentWord.empty()) {
+        if (uniqueWords.insert(currentWord).second) {
+            if (!result.empty()) {
+                result += " ";
+            }
+            result += currentWord;
+        }
+        hasValidWords = true;
+    }
+
+    if (isInvalid || !hasValidWords) {
+        return "Invalid input: non-alphabetic characters or invalid format";
+    }
+
+    return result.empty() ? "Invalid input: no valid words" : result;
 }
 
 void DataProcessor::run() {
-    std::cout << "Data Processor started. Waiting for clients..." << std::endl;
+    std::cout << "Data Processor started." << std::endl;
     while (true) {
         SOCKET clientSocket = accept(_clientServer.getSocket(), nullptr, nullptr);
         if (clientSocket == INVALID_SOCKET) {

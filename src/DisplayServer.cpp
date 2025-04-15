@@ -18,7 +18,7 @@ DisplayServer::DisplayServer(int port) : _network() {
 }
 
 void DisplayServer::run() {
-    std::cout << "Display Server started. Waiting for data..." << std::endl;
+    std::cout << "Display Server started." << std::endl;
     while (true) {
         SOCKET clientSocket = accept(_network.getSocket(), nullptr, nullptr);
         if (clientSocket == INVALID_SOCKET) {
@@ -30,7 +30,7 @@ void DisplayServer::run() {
             int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
             if (bytesReceived > 0) {
                 buffer[bytesReceived] = '\0';
-                std::cout << "Result: " << buffer << std::endl;
+                std::cout << buffer << std::endl;
             }
         }
 

@@ -30,7 +30,7 @@ void Client::sendData(const std::string& data) {
 }
 
 void Client::run() {
-    std::cout << "Client started. Waiting for data..." << std::endl;
+    std::cout << "Client started." << std::endl;
     std::string input;
     while (std::getline(std::cin, input)) {
         sendData(input);
