@@ -6,7 +6,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 
-DataProcessor::DataProcessor(int processorPort, const char* displayIp, int displayPort)
+DataProcessor::DataProcessor(const char* displayIp, int processorPort, int displayPort)
     : _clientServer(), _displayClient() {
 
     _clientServer.createSocket();
@@ -28,32 +28,52 @@ DataProcessor::DataProcessor(int processorPort, const char* displayIp, int displ
 
 std::string DataProcessor::processData(const std::string& data) {
     std::unordered_set<std::string> uniqueWords;
-    std::string currentWord;
-    std::string result;
-    bool isFirstWord = true;
+    std::vector<std::string> tokens;
+    std::string currentToken;
+    bool isCurrentWord = false;
 
-    auto addWord = [&] () {
-        if (!currentWord.empty()) {
-            if (uniqueWords.insert(currentWord).second) {
-                if (!isFirstWord) {
-                    result += " ";
-                } else {
-                    isFirstWord = false;
-                }
-                result += currentWord;
+    for (char c : data) {
+        bool isWordChar = (std::isalpha(c) || c == '-' || c == '\'');
+
+        if (isWordChar) {
+            if (!isCurrentWord && !currentToken.empty()) {
+                tokens.push_back(currentToken);
+                currentToken.clear();
             }
-            currentWord.clear();
-        }
-    };
-
-    for (const char c : data) {
-        if (std::isalpha(c) || c == '-' || c == '\'') {
-            currentWord += c;
+            isCurrentWord = true;
+            currentToken += c;
         } else {
-            addWord();
+            if (isCurrentWord && !currentToken.empty()) {
+                tokens.push_back(currentToken);
+                currentToken.clear();
+            }
+            isCurrentWord = false;
+            currentToken += c;
         }
     }
-    addWord();
+
+    if (!currentToken.empty()) {
+        tokens.push_back(currentToken);
+    }
+
+    std::string result;
+    for (const auto& token : tokens) {
+        bool isWord = true;
+        for (char c : token) {
+            if (!std::isalpha(c) && c != '-' && c != '\'') {
+                isWord = false;
+                break;
+            }
+        }
+
+        if (isWord && !token.empty()) {
+            if (uniqueWords.insert(token).second) {
+                result += token;
+            }
+        } else {
+            result += token;
+        }
+    }
 
     return result;
 }

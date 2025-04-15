@@ -11,6 +11,6 @@ private:
     std::string processData(const std::string& data);
 
 public:
-    DataProcessor(int processorPort, const char* displayIp, int displayPort);
+    DataProcessor(const char* displayIp, int processorPort, int displayPort);
     void run();
 };

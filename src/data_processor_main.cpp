@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     }
 
     try {
-        DataProcessor dp(std::stoi(argv[1]), argv[2], std::stoi(argv[3]));
+        DataProcessor dp(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
         dp.run();
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
