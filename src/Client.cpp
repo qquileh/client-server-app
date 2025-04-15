@@ -1,6 +1,7 @@
 #include "../include/Client.h"
 #include <stdexcept>
 #include <iostream>
+#include <string>
 #include <ws2tcpip.h>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -33,6 +34,9 @@ void Client::run() {
     std::cout << "Client started." << std::endl;
     std::string input;
     while (std::getline(std::cin, input)) {
+        if (input.empty()) {
+            continue;
+        }
         sendData(input);
     }
 }

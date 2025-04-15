@@ -1,90 +1,38 @@
 #include "../include/DataProcessor.h"
 #include <iostream>
-#include <unordered_set>
 #include <ws2tcpip.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
 
-DataProcessor::DataProcessor(const char* displayIp, int processorPort, int displayPort)
-    : _clientServer(), _displayClient() {
-
-    _clientServer.createSocket();
-    _clientServer.setupAddress(processorPort);
-
-    if (bind(_clientServer.getSocket(), (sockaddr*)_clientServer.getAddress(), sizeof(sockaddr_in)) == SOCKET_ERROR) {
-        throw std::runtime_error("Bind failed");
-    }
-    listen(_clientServer.getSocket(), 5);
-
-
-    _displayClient.createSocket();
-    _displayClient.setupAddress(displayPort, displayIp);
-
-    if (connect(_displayClient.getSocket(), (sockaddr*)_displayClient.getAddress(), sizeof(sockaddr_in)) == SOCKET_ERROR) {
-        throw std::runtime_error("Connection to display server failed");
-    }
+const DataProcessorUtils& DataProcessor::getUtils() const {
+    return _utils;
 }
 
-std::string DataProcessor::processData(const std::string& data) {
-    std::unordered_set<std::string> uniqueWords;
-    std::string result;
-    std::string currentWord;
-    bool isInvalid = false;
-    bool lastSymbolWasNonAlpha = false;
-    bool hasValidWords = false;
+DataProcessor::DataProcessor(const char* displayIp, int processorPort, int displayPort)
+    : _processorServer(), _displayConnector() {
 
-    for (size_t i = 0; i < data.size(); ++i) {
-        char c = data[i];
+    _processorServer.createSocket();
+    _processorServer.setupAddress(processorPort);
 
-        if (std::isalpha(static_cast<unsigned char>(c))) {
-            currentWord += c;
-            lastSymbolWasNonAlpha = false;
-            hasValidWords = true;
-        } else {
-            if (!currentWord.empty()) {
-                if (uniqueWords.insert(currentWord).second) {
-                    if (!result.empty()) {
-                        result += " ";
-                    }
-                    result += currentWord;
-                }
-                currentWord.clear();
-            }
-
-            if (c != ' ' && c != ',' && c != '.' && c != '!' && c != '?') {
-                isInvalid = true;
-            }
-
-            if (c != ' ' && lastSymbolWasNonAlpha && data[i - 1] != ' ') {
-                isInvalid = true;
-            }
-
-            lastSymbolWasNonAlpha = (c != ' ');
-        }
+    if (bind(_processorServer.getSocket(), (sockaddr*)_processorServer.getAddress(), sizeof(sockaddr_in)) == SOCKET_ERROR) {
+        throw std::runtime_error("Bind failed");
     }
+    listen(_processorServer.getSocket(), 5);
 
-    if (!currentWord.empty()) {
-        if (uniqueWords.insert(currentWord).second) {
-            if (!result.empty()) {
-                result += " ";
-            }
-            result += currentWord;
-        }
-        hasValidWords = true;
+
+    _displayConnector.createSocket();
+    _displayConnector.setupAddress(displayPort, displayIp);
+
+    if (connect(_displayConnector.getSocket(), (sockaddr*)_displayConnector.getAddress(), sizeof(sockaddr_in)) == SOCKET_ERROR) {
+        throw std::runtime_error("Connection to display server failed");
     }
-
-    if (isInvalid || !hasValidWords) {
-        return "Invalid input: non-alphabetic characters or invalid format";
-    }
-
-    return result.empty() ? "Invalid input: no valid words" : result;
 }
 
 void DataProcessor::run() {
     std::cout << "Data Processor started." << std::endl;
     while (true) {
-        SOCKET clientSocket = accept(_clientServer.getSocket(), nullptr, nullptr);
+        SOCKET clientSocket = accept(_processorServer.getSocket(), nullptr, nullptr);
         if (clientSocket == INVALID_SOCKET) {
             continue;
         }
@@ -95,9 +43,9 @@ void DataProcessor::run() {
             bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
             if (bytesReceived > 0) {
                 buffer[bytesReceived] = '\0';
-                std::string result = processData(buffer);
+                std::string result = _utils.processData(buffer);
                 send(clientSocket, "OK", 2, 0);
-                send(_displayClient.getSocket(), result.c_str(), (int) result.size(), 0);
+                send(_displayConnector.getSocket(), result.c_str(), (int) result.size(), 0);
             }
         } while (bytesReceived > 0);
 
