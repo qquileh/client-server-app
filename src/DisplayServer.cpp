@@ -7,7 +7,6 @@
 
 
 DisplayServer::DisplayServer(int port) : _network() {
-    _network.initWinsock();
     _network.createSocket();
     _network.setupAddress(port);
 

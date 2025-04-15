@@ -13,7 +13,6 @@ public:
     NetworkBase();
     ~NetworkBase();
 
-    void initWinsock();
     void createSocket(int type = SOCK_STREAM);
     void setupAddress(int port, const char* ip = nullptr);
 

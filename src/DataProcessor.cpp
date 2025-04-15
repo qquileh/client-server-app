@@ -1,6 +1,5 @@
 #include "../include/DataProcessor.h"
 #include <iostream>
-#include <sstream>
 #include <unordered_set>
 #include <ws2tcpip.h>
 
@@ -10,7 +9,6 @@
 DataProcessor::DataProcessor(int processorPort, const char* displayIp, int displayPort)
     : _clientServer(), _displayClient() {
 
-    _clientServer.initWinsock();
     _clientServer.createSocket();
     _clientServer.setupAddress(processorPort);
 
@@ -20,7 +18,6 @@ DataProcessor::DataProcessor(int processorPort, const char* displayIp, int displ
     listen(_clientServer.getSocket(), 5);
 
 
-    _displayClient.initWinsock();
     _displayClient.createSocket();
     _displayClient.setupAddress(displayPort, displayIp);
 
@@ -30,21 +27,34 @@ DataProcessor::DataProcessor(int processorPort, const char* displayIp, int displ
 }
 
 std::string DataProcessor::processData(const std::string& data) {
-    std::istringstream iss(data);
     std::unordered_set<std::string> uniqueWords;
-    std::string word;
-    while (iss >> word) {
-        uniqueWords.insert(word);
-    }
+    std::string currentWord;
+    std::string result;
+    bool isFirstWord = true;
 
-    std::ostringstream oss;
-    for (const auto& w : uniqueWords) {
-        oss << w << " ";
+    auto addWord = [&] () {
+        if (!currentWord.empty()) {
+            if (uniqueWords.insert(currentWord).second) {
+                if (!isFirstWord) {
+                    result += " ";
+                } else {
+                    isFirstWord = false;
+                }
+                result += currentWord;
+            }
+            currentWord.clear();
+        }
+    };
+
+    for (const char c : data) {
+        if (std::isalpha(c) || c == '-' || c == '\'') {
+            currentWord += c;
+        } else {
+            addWord();
+        }
     }
-    std::string result = oss.str();
-    if (!result.empty()) {
-        result.pop_back();
-    }
+    addWord();
+
     return result;
 }
 
@@ -64,7 +74,7 @@ void DataProcessor::run() {
                 buffer[bytesReceived] = '\0';
                 std::string result = processData(buffer);
                 send(clientSocket, "OK", 2, 0);
-                send(_displayClient.getSocket(), result.c_str(), result.size(), 0);
+                send(_displayClient.getSocket(), result.c_str(), (int) result.size(), 0);
             }
         } while (bytesReceived > 0);
 

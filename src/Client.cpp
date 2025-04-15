@@ -7,7 +7,6 @@
 
 
 Client::Client(const char* ip, int port) : _network() {
-    _network.initWinsock();
     _network.createSocket();
     _network.setupAddress(port, ip);
 
@@ -18,7 +17,7 @@ Client::Client(const char* ip, int port) : _network() {
 
 void Client::sendData(const std::string& data) {
     SOCKET socket = _network.getSocket();
-    if (send(socket, data.c_str(), data.size(), 0) == SOCKET_ERROR) {
+    if (send(socket, data.c_str(), (int) data.size(), 0) == SOCKET_ERROR) {
         throw std::runtime_error("Send failed");
     }
 
@@ -28,7 +27,6 @@ void Client::sendData(const std::string& data) {
         throw std::runtime_error("Server disconnected");
     }
     buffer[bytesReceived] = '\0';
-    std::cout << "ACK: " << buffer << std::endl;
 }
 
 void Client::run() {
