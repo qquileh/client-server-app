@@ -1,15 +1,15 @@
 
-# Задание
+# Р—Р°РґР°РЅРёРµ
 
-## Запуск
-После того, как произведен ```build```, выполнить:
+## Р—Р°РїСѓСЃРє
+РџРѕСЃР»Рµ С‚РѕРіРѕ, РєР°Рє РїСЂРѕРёР·РІРµРґРµРЅ ```build```, РІС‹РїРѕР»РЅРёС‚СЊ:
 ```bash
 display_server.exe <display_port>
 data_processor.exe "<display_ip>" <processor_port> <display_port>
 client.exe "<server_ip>" <processor_port>
 ```
 
-Например:
+РќР°РїСЂРёРјРµСЂ:
 ```bash
 display_server.exe 54002
 data_processor.exe "127.0.0.1" 54001 54002
@@ -17,7 +17,7 @@ client.exe "127.0.0.1" 54001
 ```
 
 
-## Запуск тестов
+## Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ
 ```bash
 DataProcessorTests.exe
 ```
